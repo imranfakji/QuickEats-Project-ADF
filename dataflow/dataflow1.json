@@ -37,13 +37,13 @@
 			],
 			"transformations": [
 				{
-					"name": "derivedColumn1"
+					"name": "DerivedUsefulColumnsFromOrders"
 				},
 				{
-					"name": "derivedColumn2"
+					"name": "DerivedUsefulColumnsFromUsers"
 				},
 				{
-					"name": "derivedColumn3"
+					"name": "DerivedUsefulColumnsFromFoods"
 				},
 				{
 					"name": "OrderAndUsersJoin"
@@ -90,10 +90,10 @@
 				"          amount = {amount},",
 				"          status = {status},",
 				"          payment = {payment},",
-				"          {__v} = {__v}) ~> derivedColumn1",
-				"USERS derive(name = {name}) ~> derivedColumn2",
-				"FOODS derive(name = {name}) ~> derivedColumn3",
-				"derivedColumn1, derivedColumn2 join(derivedColumn1@{__v} == USERS@{__v},",
+				"          {__v} = {__v}) ~> DerivedUsefulColumnsFromOrders",
+				"USERS derive(name = {name}) ~> DerivedUsefulColumnsFromUsers",
+				"FOODS derive(name = {name}) ~> DerivedUsefulColumnsFromFoods",
+				"DerivedUsefulColumnsFromOrders, DerivedUsefulColumnsFromUsers join(DerivedUsefulColumnsFromOrders@{__v} == USERS@{__v},",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
@@ -103,7 +103,7 @@
 				"          amount,",
 				"          status,",
 				"          payment,",
-				"          {__v} = derivedColumn1@{__v},",
+				"          {__v} = DerivedUsefulColumnsFromOrders@{__v},",
 				"          name,",
 				"          email,",
 				"          password,",
@@ -111,7 +111,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> JoinedOrderAndUsers",
-				"derivedColumn3, JoinedOrderAndUsers join(FOODS@{__v} == JoinedOrderAndUsers@{__v},",
+				"DerivedUsefulColumnsFromFoods, JoinedOrderAndUsers join(FOODS@{__v} == JoinedOrderAndUsers@{__v},",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
