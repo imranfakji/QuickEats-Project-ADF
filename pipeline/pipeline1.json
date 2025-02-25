@@ -161,7 +161,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflow1",
+						"referenceName": "BRONZE_TO_SILVER",
 						"type": "DataFlowReference"
 					},
 					"compute": {
