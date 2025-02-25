@@ -1,0 +1,9 @@
+{
+	"name": "quickeats-adf",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "80da8042-7025-45cb-8f29-bb5282c4c72a",
+		"tenantId": "c6805df1-9ae9-4704-a632-1bb4e61292ff"
+	}
+}
