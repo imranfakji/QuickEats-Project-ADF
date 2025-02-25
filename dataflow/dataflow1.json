@@ -3,11 +3,126 @@
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
-			"sources": [],
-			"sinks": [],
-			"transformations": [],
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADLS_ORDERS",
+						"type": "DatasetReference"
+					},
+					"name": "ORDERS"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_USERS",
+						"type": "DatasetReference"
+					},
+					"name": "USERS"
+				},
+				{
+					"dataset": {
+						"referenceName": "ADLS_FOODS",
+						"type": "DatasetReference"
+					},
+					"name": "FOODS"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SILVER_LAYER_ADLS",
+						"type": "DatasetReference"
+					},
+					"name": "SinkToADLSSilverLayer"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "OrderAndUsersJoin"
+				},
+				{
+					"name": "JoinedOrderAndUsers"
+				},
+				{
+					"name": "AllThreeTablesJoined"
+				}
+			],
 			"scriptLines": [
-				""
+				"source(output(",
+				"          userId as string,",
+				"          amount as short,",
+				"          status as string,",
+				"          payment as boolean,",
+				"          {__v} as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> ORDERS",
+				"source(output(",
+				"          name as string,",
+				"          email as string,",
+				"          password as string,",
+				"          {__v} as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> USERS",
+				"source(output(",
+				"          name as string,",
+				"          description as string,",
+				"          price as short,",
+				"          image as string,",
+				"          category as string,",
+				"          {__v} as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> FOODS",
+				"ORDERS derive(userId = {userId},",
+				"          amount = {amount},",
+				"          status = {status},",
+				"          payment = {payment},",
+				"          {__v} = {__v}) ~> derivedColumn1",
+				"USERS derive(name = {name}) ~> derivedColumn2",
+				"FOODS derive(name = {name}) ~> derivedColumn3",
+				"derivedColumn1, derivedColumn2 join(derivedColumn1@{__v} == USERS@{__v},",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> OrderAndUsersJoin",
+				"OrderAndUsersJoin select(mapColumn(",
+				"          userId,",
+				"          amount,",
+				"          status,",
+				"          payment,",
+				"          {__v} = derivedColumn1@{__v},",
+				"          name,",
+				"          email,",
+				"          password,",
+				"          {__v} = USERS@{__v}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> JoinedOrderAndUsers",
+				"derivedColumn3, JoinedOrderAndUsers join(FOODS@{__v} == JoinedOrderAndUsers@{__v},",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> AllThreeTablesJoined",
+				"AllThreeTablesJoined sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkToADLSSilverLayer"
 			]
 		}
 	}
