@@ -15,36 +15,8 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "MongoDbV2Source",
-						"batchSize": 100
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings",
-							"copyBehavior": "FlattenHierarchy"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".csv"
-						}
-					},
 					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "MONGODB_FOODS_TO_ADLS",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "ADLS_FOODS",
-						"type": "DatasetReference"
-					}
-				]
+				}
 			},
 			{
 				"name": "MONGODB_TO_ADLS_ORDERS",
@@ -75,7 +47,210 @@
 							"fileExtension": ".csv"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['_id']['$oid']"
+								},
+								"sink": {
+									"name": "$oid",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['userId']"
+								},
+								"sink": {
+									"name": "userId",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['_id']"
+								},
+								"sink": {
+									"name": "_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['name']"
+								},
+								"sink": {
+									"name": "name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['description']"
+								},
+								"sink": {
+									"name": "description",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['price']"
+								},
+								"sink": {
+									"name": "price",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['image']"
+								},
+								"sink": {
+									"name": "image",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['category']"
+								},
+								"sink": {
+									"name": "category",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['quantity']"
+								},
+								"sink": {
+									"name": "quantity",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['amount']"
+								},
+								"sink": {
+									"name": "amount",
+									"type": "Double"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['firstName']"
+								},
+								"sink": {
+									"name": "firstName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['lastName']"
+								},
+								"sink": {
+									"name": "lastName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['email']"
+								},
+								"sink": {
+									"name": "email",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['street']"
+								},
+								"sink": {
+									"name": "street",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['city']"
+								},
+								"sink": {
+									"name": "city",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['state']"
+								},
+								"sink": {
+									"name": "state",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['zipcode']"
+								},
+								"sink": {
+									"name": "zipcode",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['country']"
+								},
+								"sink": {
+									"name": "country",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['address']['phone']"
+								},
+								"sink": {
+									"name": "phone",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['status']"
+								},
+								"sink": {
+									"name": "status",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['date']['$date']"
+								},
+								"sink": {
+									"name": "$date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['payment']"
+								},
+								"sink": {
+									"name": "payment",
+									"type": "Boolean"
+								}
+							}
+						]
+					}
 				},
 				"inputs": [
 					{
@@ -119,7 +294,48 @@
 							"fileExtension": ".csv"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['_id']['$oid']"
+								},
+								"sink": {
+									"name": "$oid",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']"
+								},
+								"sink": {
+									"name": "name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['email']"
+								},
+								"sink": {
+									"name": "email",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['password']"
+								},
+								"sink": {
+									"name": "password",
+									"type": "String"
+								}
+							}
+						]
+					}
 				},
 				"inputs": [
 					{
@@ -146,6 +362,12 @@
 					},
 					{
 						"activity": "MONGODB_TO_ADLS_USERS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "MONGODB_TO_ADLS_FOODS",
 						"dependencyConditions": [
 							"Succeeded"
 						]

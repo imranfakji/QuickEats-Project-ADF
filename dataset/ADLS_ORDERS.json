@@ -17,6 +17,27 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "userId",
+				"type": "String"
+			},
+			{
+				"name": "amount",
+				"type": "String"
+			},
+			{
+				"name": "status",
+				"type": "String"
+			},
+			{
+				"name": "payment",
+				"type": "String"
+			},
+			{
+				"name": "__v",
+				"type": "String"
+			}
+		]
 	}
 }
