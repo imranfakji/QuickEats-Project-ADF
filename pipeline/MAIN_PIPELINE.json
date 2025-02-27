@@ -3,22 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "MONGODB_TO_ADLS_FOODS",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"enableStaging": false
-				}
-			},
-			{
 				"name": "MONGODB_TO_ADLS_ORDERS",
 				"type": "Copy",
 				"dependsOn": [],
@@ -266,7 +250,44 @@
 				]
 			},
 			{
-				"name": "MONGODB_TO_ADLS_USERS",
+				"name": "BRONZE_TO_SILVER",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "MONGODB_TO_ADLS_ORDERS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "BRONZE_TO_SILVER",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Copy data1",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -291,7 +312,7 @@
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
 							"quoteAllText": true,
-							"fileExtension": ".csv"
+							"fileExtension": ".txt"
 						}
 					},
 					"enableStaging": false,
@@ -349,49 +370,6 @@
 						"type": "DatasetReference"
 					}
 				]
-			},
-			{
-				"name": "BRONZE_TO_SILVER",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "MONGODB_TO_ADLS_ORDERS",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "MONGODB_TO_ADLS_USERS",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "MONGODB_TO_ADLS_FOODS",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "BRONZE_TO_SILVER",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
 			}
 		],
 		"annotations": []
