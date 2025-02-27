@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "quickeats-adf"
+		},
+		"MongoDb1_connectionString": {
+			"value": ""
+		},
+		"mongodb_foods_adls_accountKey": {
+			"value": ""
+		},
+		"MongoDb1_properties_typeProperties_database": {
+			"value": "food-del"
+		},
+		"mongodb_foods_adls_properties_typeProperties_url": {
+			"value": "https://quickeatssa.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

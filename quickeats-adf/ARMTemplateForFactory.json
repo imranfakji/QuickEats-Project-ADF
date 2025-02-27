@@ -1,0 +1,1114 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "quickeats-adf"
+		},
+		"MongoDb1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MongoDb1'"
+		},
+		"mongodb_foods_adls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'mongodb_foods_adls'"
+		},
+		"MongoDb1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "food-del"
+		},
+		"mongodb_foods_adls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://quickeatssa.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/MAIN_PIPELINE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "MONGODB_TO_ADLS_ORDERS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "MongoDbV2Source",
+								"batchSize": 100
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['_id']['$oid']"
+										},
+										"sink": {
+											"name": "$oid",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['userId']"
+										},
+										"sink": {
+											"name": "userId",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['_id']"
+										},
+										"sink": {
+											"name": "_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['name']"
+										},
+										"sink": {
+											"name": "name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['description']"
+										},
+										"sink": {
+											"name": "description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['price']"
+										},
+										"sink": {
+											"name": "price",
+											"type": "Double"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['image']"
+										},
+										"sink": {
+											"name": "image",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['category']"
+										},
+										"sink": {
+											"name": "category",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['items'][0]['quantity']"
+										},
+										"sink": {
+											"name": "quantity",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "$['amount']"
+										},
+										"sink": {
+											"name": "amount",
+											"type": "Double"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['firstName']"
+										},
+										"sink": {
+											"name": "firstName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['lastName']"
+										},
+										"sink": {
+											"name": "lastName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['email']"
+										},
+										"sink": {
+											"name": "email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['street']"
+										},
+										"sink": {
+											"name": "street",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['city']"
+										},
+										"sink": {
+											"name": "city",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['state']"
+										},
+										"sink": {
+											"name": "state",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['zipcode']"
+										},
+										"sink": {
+											"name": "zipcode",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['country']"
+										},
+										"sink": {
+											"name": "country",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']['phone']"
+										},
+										"sink": {
+											"name": "phone",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "$['status']"
+										},
+										"sink": {
+											"name": "status",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['date']['$date']"
+										},
+										"sink": {
+											"name": "$date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['payment']"
+										},
+										"sink": {
+											"name": "payment",
+											"type": "Boolean"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MONGODB_ORDERS_TO_ADLS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADLS_ORDERS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "BRONZE_TO_SILVER",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "MONGODB_TO_ADLS_ORDERS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Copy data1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "BRONZE_TO_SILVER",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ORDERS": {},
+									"USERS": {},
+									"SinkToADLSSilverLayer": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "MongoDbV2Source",
+								"batchSize": 100
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['_id']['$oid']"
+										},
+										"sink": {
+											"name": "$oid",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']"
+										},
+										"sink": {
+											"name": "name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['email']"
+										},
+										"sink": {
+											"name": "email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['password']"
+										},
+										"sink": {
+											"name": "password",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MONGODB_USERS_TO_ADLS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADLS_USERS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "SILVER_TO_GOLD",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "BRONZE_TO_SILVER",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "SILER_TO_GOLD",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"SinkToGoldLayer": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/MONGODB_ORDERS_TO_ADLS')]",
+				"[concat(variables('factoryId'), '/datasets/ADLS_ORDERS')]",
+				"[concat(variables('factoryId'), '/dataflows/BRONZE_TO_SILVER')]",
+				"[concat(variables('factoryId'), '/datasets/MONGODB_USERS_TO_ADLS')]",
+				"[concat(variables('factoryId'), '/datasets/ADLS_USERS')]",
+				"[concat(variables('factoryId'), '/dataflows/SILER_TO_GOLD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_ORDERS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "mongodb_foods_adls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "quickeats-orders"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "userId",
+						"type": "String"
+					},
+					{
+						"name": "amount",
+						"type": "String"
+					},
+					{
+						"name": "status",
+						"type": "String"
+					},
+					{
+						"name": "payment",
+						"type": "String"
+					},
+					{
+						"name": "__v",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/mongodb_foods_adls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADLS_USERS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "mongodb_foods_adls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "quickeats-users"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/mongodb_foods_adls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MONGODB_ORDERS_TO_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MongoDb1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "MongoDbV2Collection",
+				"schema": [],
+				"typeProperties": {
+					"collection": "orders"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MongoDb1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MONGODB_USERS_TO_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MongoDb1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "MongoDbV2Collection",
+				"schema": [],
+				"typeProperties": {
+					"collection": "users"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MongoDb1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SILVER_LAYER_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "mongodb_foods_adls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "silver-layer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "name",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "price",
+						"type": "String"
+					},
+					{
+						"name": "image",
+						"type": "String"
+					},
+					{
+						"name": "category",
+						"type": "String"
+					},
+					{
+						"name": "__v",
+						"type": "String"
+					},
+					{
+						"name": "$oid",
+						"type": "String"
+					},
+					{
+						"name": "userId",
+						"type": "String"
+					},
+					{
+						"name": "amount",
+						"type": "String"
+					},
+					{
+						"name": "status",
+						"type": "String"
+					},
+					{
+						"name": "payment",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "password",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/mongodb_foods_adls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MongoDb1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "MongoDbV2",
+				"typeProperties": {
+					"connectionString": "[parameters('MongoDb1_connectionString')]",
+					"database": "[parameters('MongoDb1_properties_typeProperties_database')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/mongodb_foods_adls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('mongodb_foods_adls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('mongodb_foods_adls_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BRONZE_TO_SILVER')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ADLS_ORDERS",
+								"type": "DatasetReference"
+							},
+							"name": "ORDERS"
+						},
+						{
+							"dataset": {
+								"referenceName": "ADLS_USERS",
+								"type": "DatasetReference"
+							},
+							"name": "USERS"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "SILVER_LAYER_ADLS",
+								"type": "DatasetReference"
+							},
+							"name": "SinkToADLSSilverLayer"
+						}
+					],
+					"transformations": [
+						{
+							"name": "DerivedUsefulColumnsFromOrders"
+						},
+						{
+							"name": "DerivedUsefulColumnsFromUsers"
+						},
+						{
+							"name": "OrderAndUsersJoin"
+						},
+						{
+							"name": "JoinedOrderAndUsers"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {$oid} as string,",
+						"          userId as string,",
+						"          {_id} as string,",
+						"          name as string,",
+						"          description as string,",
+						"          price as short,",
+						"          image as string,",
+						"          category as string,",
+						"          quantity as short,",
+						"          amount as short,",
+						"          firstName as string,",
+						"          lastName as string,",
+						"          email as string,",
+						"          street as string,",
+						"          city as string,",
+						"          state as string,",
+						"          zipcode as integer,",
+						"          country as string,",
+						"          phone as long,",
+						"          status as string,",
+						"          {$date} as long,",
+						"          payment as boolean",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> ORDERS",
+						"source(output(",
+						"          {$oid} as string,",
+						"          name as string,",
+						"          email as string,",
+						"          password as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> USERS",
+						"ORDERS derive({$date} = toTimestamp({$date}, 'yyyy-MM-dd HH:mm:ss')) ~> DerivedUsefulColumnsFromOrders",
+						"USERS derive(name = {name}) ~> DerivedUsefulColumnsFromUsers",
+						"DerivedUsefulColumnsFromOrders, DerivedUsefulColumnsFromUsers join(userId == USERS@{$oid},",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> OrderAndUsersJoin",
+						"OrderAndUsersJoin select(mapColumn(",
+						"          {$oid} = ORDERS@{$oid},",
+						"          userId,",
+						"          {_id},",
+						"          name = ORDERS@name,",
+						"          description,",
+						"          price,",
+						"          image,",
+						"          category,",
+						"          quantity,",
+						"          amount,",
+						"          firstName,",
+						"          lastName,",
+						"          email = ORDERS@email,",
+						"          street,",
+						"          city,",
+						"          state,",
+						"          zipcode,",
+						"          country,",
+						"          phone,",
+						"          status,",
+						"          {$date},",
+						"          payment,",
+						"          {$oid} = USERS@{$oid},",
+						"          name = DerivedUsefulColumnsFromUsers@name,",
+						"          email = USERS@email,",
+						"          password",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> JoinedOrderAndUsers",
+						"JoinedOrderAndUsers sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          name as string,",
+						"          description as string,",
+						"          price as string,",
+						"          image as string,",
+						"          category as string,",
+						"          {__v} as string,",
+						"          {$oid} as string,",
+						"          userId as string,",
+						"          amount as string,",
+						"          status as string,",
+						"          payment as string,",
+						"          email as string,",
+						"          password as string",
+						"     ),",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SinkToADLSSilverLayer"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ADLS_ORDERS')]",
+				"[concat(variables('factoryId'), '/datasets/ADLS_USERS')]",
+				"[concat(variables('factoryId'), '/datasets/SILVER_LAYER_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SILER_TO_GOLD')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "SILVER_LAYER_ADLS",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "GOLD_LAYER_ADLS",
+								"type": "DatasetReference"
+							},
+							"name": "SinkToGoldLayer"
+						}
+					],
+					"transformations": [
+						{
+							"name": "TotalRevenuePerCity"
+						},
+						{
+							"name": "DerivesOrderHour1"
+						},
+						{
+							"name": "PeakOrderingHour"
+						},
+						{
+							"name": "TotalRevenuePerDay"
+						},
+						{
+							"name": "TotalSpentPerUser"
+						},
+						{
+							"name": "SpendingCategory"
+						},
+						{
+							"name": "totalCustomerPerCategory"
+						},
+						{
+							"name": "AverageOrderValue"
+						},
+						{
+							"name": "TotalTransactionsAndFailedTransactions"
+						},
+						{
+							"name": "CategoryWiseSales"
+						},
+						{
+							"name": "derivedColumnForjoinKey"
+						},
+						{
+							"name": "derivedColumnForJoinKey1"
+						},
+						{
+							"name": "derivedColumnForjoinKey2"
+						},
+						{
+							"name": "derivedColumnForJoinKey3"
+						},
+						{
+							"name": "derivedColumnForJoinKey4"
+						},
+						{
+							"name": "join1"
+						},
+						{
+							"name": "join2"
+						},
+						{
+							"name": "join3"
+						},
+						{
+							"name": "join4"
+						},
+						{
+							"name": "join5"
+						},
+						{
+							"name": "join6"
+						},
+						{
+							"name": "TransactionFailureRate"
+						},
+						{
+							"name": "FinalSelect"
+						},
+						{
+							"name": "FinalAggregation"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {$oid} as string,",
+						"          userId as string,",
+						"          {_id} as string,",
+						"          name as string,",
+						"          description as string,",
+						"          price as short,",
+						"          image as string,",
+						"          category as string,",
+						"          quantity as short,",
+						"          amount as short,",
+						"          firstName as string,",
+						"          lastName as string,",
+						"          email as string,",
+						"          street as string,",
+						"          city as string,",
+						"          state as string,",
+						"          zipcode as integer,",
+						"          country as string,",
+						"          phone as long,",
+						"          status as string,",
+						"          {$date} as timestamp,",
+						"          payment as boolean,",
+						"          password as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"derivedColumnForJoinKey4 aggregate(groupBy(city,",
+						"          join_key),",
+						"     Total_Revenue_Per_City = sum(amount)) ~> TotalRevenuePerCity",
+						"source1 derive(Order_Hour = hour({$date}),",
+						"          join_key = '1') ~> DerivesOrderHour1",
+						"DerivesOrderHour1 aggregate(groupBy(Order_Hour,",
+						"          join_key),",
+						"     Peak_Ordering_Hour = count({$oid})) ~> PeakOrderingHour",
+						"derivedColumnForJoinKey1 aggregate(groupBy(Truncated_Date,",
+						"          join_key),",
+						"     Total_Revenue_Per_Day = sum(amount)) ~> TotalRevenuePerDay",
+						"source1 aggregate(groupBy(userId),",
+						"     Total_Spent_Per_User = sum(amount)) ~> TotalSpentPerUser",
+						"TotalSpentPerUser derive(Spending_Category = case(\r",
+						"    Total_Spent_Per_User >= 3000, \"High\",\r",
+						"    Total_Spent_Per_User >= 2000, \"Medium\",\r",
+						"    \"Low\"\r",
+						"    ),",
+						"          join_key = '1') ~> SpendingCategory",
+						"SpendingCategory aggregate(groupBy(Spending_Category,",
+						"          join_key),",
+						"     Total_Customer_Per_Category = count(userId)) ~> totalCustomerPerCategory",
+						"derivedColumnForJoinKey3 aggregate(groupBy(userId,",
+						"          join_key),",
+						"     Average_Order_Value = avg(amount)) ~> AverageOrderValue",
+						"derivedColumnForjoinKey2 aggregate(groupBy(join_key),",
+						"     Total_Transactions = count(payment),",
+						"          Failed_Transactions = sum(iif(equals(payment, false()), 1, 0))) ~> TotalTransactionsAndFailedTransactions",
+						"derivedColumnForjoinKey aggregate(groupBy(category,",
+						"          join_key),",
+						"     Category_Wise_Sales = sum(amount)) ~> CategoryWiseSales",
+						"source1 derive(join_key = '1') ~> derivedColumnForjoinKey",
+						"source1 derive(join_key = '1',",
+						"          Truncated_Date = toDate(fromUTC({$date}, 'yyyy-MM-dd'))) ~> derivedColumnForJoinKey1",
+						"source1 derive(join_key = '1') ~> derivedColumnForjoinKey2",
+						"source1 derive(join_key = '1') ~> derivedColumnForJoinKey3",
+						"source1 derive(join_key = '1') ~> derivedColumnForJoinKey4",
+						"TotalRevenuePerCity, AverageOrderValue join(TotalRevenuePerCity@join_key == AverageOrderValue@join_key,",
+						"     joinType:'outer',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join1",
+						"TransactionFailureRate, TotalRevenuePerDay join(TotalTransactionsAndFailedTransactions@join_key == TotalRevenuePerDay@join_key,",
+						"     joinType:'outer',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join2",
+						"CategoryWiseSales, PeakOrderingHour join(CategoryWiseSales@join_key == PeakOrderingHour@join_key,",
+						"     joinType:'outer',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join3",
+						"join3, totalCustomerPerCategory join(CategoryWiseSales@join_key == totalCustomerPerCategory@join_key,",
+						"     joinType:'outer',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join4",
+						"join1, join2 join(AverageOrderValue@join_key == TotalTransactionsAndFailedTransactions@join_key,",
+						"     joinType:'outer',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join5",
+						"join5, join4 join(TotalTransactionsAndFailedTransactions@join_key == CategoryWiseSales@join_key,",
+						"     joinType:'outer',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> join6",
+						"TotalTransactionsAndFailedTransactions derive(Transaction_Failure_Rate = (Failed_Transactions / Total_Transactions) * 100) ~> TransactionFailureRate",
+						"join6 select(mapColumn(",
+						"          city,",
+						"          Total_Revenue_Per_City,",
+						"          userId,",
+						"          Average_Order_Value,",
+						"          Total_Transactions,",
+						"          Failed_Transactions,",
+						"          Transaction_Failure_Rate,",
+						"          Truncated_Date,",
+						"          Total_Revenue_Per_Day,",
+						"          category,",
+						"          Category_Wise_Sales,",
+						"          Order_Hour,",
+						"          Peak_Ordering_Hour,",
+						"          Spending_Category,",
+						"          Total_Customer_Per_Category",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> FinalSelect",
+						"FinalSelect aggregate(groupBy(Truncated_Date,",
+						"          userId,",
+						"          city,",
+						"          category),",
+						"     total_revenue_per_day = first(Total_Revenue_Per_City),",
+						"          total_orders_per_user = first(userId),",
+						"          avg_order_value = first(Average_Order_Value),",
+						"          category_wise_sales = first(Category_Wise_Sales),",
+						"          transaction_failure_rate = first(Transaction_Failure_Rate),",
+						"          total_revenue_per_city = first(Total_Revenue_Per_City)) ~> FinalAggregation",
+						"FinalAggregation sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SinkToGoldLayer"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SILVER_LAYER_ADLS')]",
+				"[concat(variables('factoryId'), '/datasets/GOLD_LAYER_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GOLD_LAYER_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "mongodb_foods_adls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "gold-layer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/mongodb_foods_adls')]"
+			]
+		}
+	]
+}
