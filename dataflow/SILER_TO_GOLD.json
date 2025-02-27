@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "SILER_TO_GOLD",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -12,13 +12,87 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "GOLD_LAYER_ADLS",
+						"type": "DatasetReference"
+					},
+					"name": "SinkToGoldLayer"
+				}
+			],
 			"transformations": [
 				{
-					"name": "aggregate1"
+					"name": "TotalRevenuePerCity"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "DerivesOrderHour1"
+				},
+				{
+					"name": "PeakOrderingHour"
+				},
+				{
+					"name": "TotalRevenuePerDay"
+				},
+				{
+					"name": "TotalSpentPerUser"
+				},
+				{
+					"name": "SpendingCategory"
+				},
+				{
+					"name": "totalCustomerPerCategory"
+				},
+				{
+					"name": "AverageOrderValue"
+				},
+				{
+					"name": "TotalTransactionsAndFailedTransactions"
+				},
+				{
+					"name": "CategoryWiseSales"
+				},
+				{
+					"name": "derivedColumnForjoinKey"
+				},
+				{
+					"name": "derivedColumnForJoinKey1"
+				},
+				{
+					"name": "derivedColumnForjoinKey2"
+				},
+				{
+					"name": "derivedColumnForJoinKey3"
+				},
+				{
+					"name": "derivedColumnForJoinKey4"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "join4"
+				},
+				{
+					"name": "join5"
+				},
+				{
+					"name": "join6"
+				},
+				{
+					"name": "TransactionFailureRate"
+				},
+				{
+					"name": "FinalSelect"
+				},
+				{
+					"name": "FinalAggregation"
 				}
 			],
 			"scriptLines": [
@@ -50,9 +124,110 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 aggregate(groupBy({$date}),",
-				"     Total_Revenue_PerDay = sum(amount)) ~> aggregate1",
-				"aggregate1 derive() ~> derivedColumn1"
+				"derivedColumnForJoinKey4 aggregate(groupBy(city,",
+				"          join_key),",
+				"     Total_Revenue_Per_City = sum(amount)) ~> TotalRevenuePerCity",
+				"source1 derive(Order_Hour = hour({$date}),",
+				"          join_key = '1') ~> DerivesOrderHour1",
+				"DerivesOrderHour1 aggregate(groupBy(Order_Hour,",
+				"          join_key),",
+				"     Peak_Ordering_Hour = count({$oid})) ~> PeakOrderingHour",
+				"derivedColumnForJoinKey1 aggregate(groupBy(Truncated_Date,",
+				"          join_key),",
+				"     Total_Revenue_Per_Day = sum(amount)) ~> TotalRevenuePerDay",
+				"source1 aggregate(groupBy(userId),",
+				"     Total_Spent_Per_User = sum(amount)) ~> TotalSpentPerUser",
+				"TotalSpentPerUser derive(Spending_Category = case(\r",
+				"    Total_Spent_Per_User >= 3000, \"High\",\r",
+				"    Total_Spent_Per_User >= 2000, \"Medium\",\r",
+				"    \"Low\"\r",
+				"    ),",
+				"          join_key = '1') ~> SpendingCategory",
+				"SpendingCategory aggregate(groupBy(Spending_Category,",
+				"          join_key),",
+				"     Total_Customer_Per_Category = count(userId)) ~> totalCustomerPerCategory",
+				"derivedColumnForJoinKey3 aggregate(groupBy(userId,",
+				"          join_key),",
+				"     Average_Order_Value = avg(amount)) ~> AverageOrderValue",
+				"derivedColumnForjoinKey2 aggregate(groupBy(join_key),",
+				"     Total_Transactions = count(payment),",
+				"          Failed_Transactions = sum(iif(equals(payment, false()), 1, 0))) ~> TotalTransactionsAndFailedTransactions",
+				"derivedColumnForjoinKey aggregate(groupBy(category,",
+				"          join_key),",
+				"     Category_Wise_Sales = sum(amount)) ~> CategoryWiseSales",
+				"source1 derive(join_key = '1') ~> derivedColumnForjoinKey",
+				"source1 derive(join_key = '1',",
+				"          Truncated_Date = toDate(fromUTC({$date}, 'yyyy-MM-dd'))) ~> derivedColumnForJoinKey1",
+				"source1 derive(join_key = '1') ~> derivedColumnForjoinKey2",
+				"source1 derive(join_key = '1') ~> derivedColumnForJoinKey3",
+				"source1 derive(join_key = '1') ~> derivedColumnForJoinKey4",
+				"TotalRevenuePerCity, AverageOrderValue join(TotalRevenuePerCity@join_key == AverageOrderValue@join_key,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"TransactionFailureRate, TotalRevenuePerDay join(TotalTransactionsAndFailedTransactions@join_key == TotalRevenuePerDay@join_key,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"CategoryWiseSales, PeakOrderingHour join(CategoryWiseSales@join_key == PeakOrderingHour@join_key,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3, totalCustomerPerCategory join(CategoryWiseSales@join_key == totalCustomerPerCategory@join_key,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join4",
+				"join1, join2 join(AverageOrderValue@join_key == TotalTransactionsAndFailedTransactions@join_key,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join5",
+				"join5, join4 join(TotalTransactionsAndFailedTransactions@join_key == CategoryWiseSales@join_key,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join6",
+				"TotalTransactionsAndFailedTransactions derive(Transaction_Failure_Rate = (Failed_Transactions / Total_Transactions) * 100) ~> TransactionFailureRate",
+				"join6 select(mapColumn(",
+				"          city,",
+				"          Total_Revenue_Per_City,",
+				"          userId,",
+				"          Average_Order_Value,",
+				"          Total_Transactions,",
+				"          Failed_Transactions,",
+				"          Transaction_Failure_Rate,",
+				"          Truncated_Date,",
+				"          Total_Revenue_Per_Day,",
+				"          category,",
+				"          Category_Wise_Sales,",
+				"          Order_Hour,",
+				"          Peak_Ordering_Hour,",
+				"          Spending_Category,",
+				"          Total_Customer_Per_Category",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> FinalSelect",
+				"FinalSelect aggregate(groupBy(Truncated_Date,",
+				"          userId,",
+				"          city,",
+				"          category),",
+				"     total_revenue_per_day = first(Total_Revenue_Per_City),",
+				"          total_orders_per_user = first(userId),",
+				"          avg_order_value = first(Average_Order_Value),",
+				"          category_wise_sales = first(Category_Wise_Sales),",
+				"          transaction_failure_rate = first(Transaction_Failure_Rate),",
+				"          total_revenue_per_city = first(Total_Revenue_Per_City)) ~> FinalAggregation",
+				"FinalAggregation sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SinkToGoldLayer"
 			]
 		}
 	}
